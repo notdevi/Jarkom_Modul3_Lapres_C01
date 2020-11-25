@@ -1,5 +1,5 @@
 # Jarkom_Modul3_Lapres_C01
-Praktikum Modul 2 Jaringan Komputer 2020
+Praktikum Modul 3 Jaringan Komputer 2020
 
 ## NAMA ANGGOTA KELOMPOK :
 
