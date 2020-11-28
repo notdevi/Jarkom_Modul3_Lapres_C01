@@ -9,6 +9,237 @@ Praktikum Modul 3 Jaringan Komputer 2020
 
 ## PEMBAHASAN SOAL
 
+### **Nomor 1**
+Membuat topologi jaringan demi kelancaran TA-nya dengan kriteria sebagai berikut :
+
+![](img/pre1.PNG)
+
+Bu Meguri memerintahkan Anri untuk menjadikan SURABAYA sebagai router, MALANG sebagai DNS Server, TUBAN sebagai DHCP server, serta MOJOKERTO sebagai Proxy server, dan UML lainnya sebagai client. 
+
+Tambahkan konfigurasi untuk pembuatan switch, router dan client pada file `topologi.sh`, sebagai berikut :
+```
+# Switch
+uml_switch -unix switch1 > /dev/null < /dev/null &
+uml_switch -unix switch2 > /dev/null < /dev/null &
+uml_switch -unix switch3 > /dev/null < /dev/null &
+
+# Router
+xterm -T SURABAYA -e linux ubd0=SURABAYA,jarkom umid=SURABAYA eth0=tuntap,,,10.151.76.9 eth1=daemon,,,switch1 eth2=daemon,,,switch3 eth3=daemon,,,switch2 mem=256M &
+
+# Server
+xterm -T MALANG -e linux ubd0=MALANG,jarkom umid=MALANG eth0=daemon,,,switch2 mem=160M &
+xterm -T MOJOKERTO -e linux ubd0=MOJOKERTO,jarkom umid=MOJOKERTO eth0=daemon,,,switch2 mem=128M &
+xterm -T TUBAN -e linux ubd0=TUBAN,jarkom umid=TUBAN eth0=daemon,,,switch2 mem=128M &
+
+# Klien
+xterm -T SIDOARJO -e linux ubd0=SIDOARJO,jarkom umid=SIDOARJO eth0=daemon,,,switch1 mem=64M &
+xterm -T GRESIK -e linux ubd0=GRESIK,jarkom umid=GRESIK eth0=daemon,,,switch1 mem=64M &
+xterm -T MADIUN -e linux ubd0=MADIUN,jarkom umid=MADIUN eth0=daemon,,,switch3 mem=64M &
+xterm -T BANYUWANGI -e linux ubd0=BANYUWANGI,jarkom umid=BANYUWANGI eth0=daemon,,,switch3 mem=64M &
+```
+
+![](img/pre1.PNG)
+
+Setelah login, setting IP pada setiap UML dengan mengetikkan `nano /etc/network/interfaces`. Lalu ditambahkan settingan sebagai berikut :
+
+Pada UML SURABAYA (Router) :
+```
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 10.151.76.10
+netmask 255.255.255.252
+gateway 10.151.76.9
+		
+auto eth1
+iface eth1 inet static
+address 192.168.0.1
+netmask 255.255.255.0
+
+auto eth2
+iface eth2 inet static
+address 192.168.1.1
+netmask 255.255.255.0
+
+auto eth3
+iface eth2 inet static
+address 10.151.77.17
+netmask 255.255.255.248
+```
+
+![](img/pre1.PNG)
+
+Pada UML MALANG (DNS Server) :
+```
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 10.151.77.18
+netmask 255.255.255.248
+gateway 10.151.77.17
+```
+
+![](img/pre1.PNG)
+
+Pada UML MOJOKERTO (Proxy Server) :
+```
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 10.151.77.19
+netmask 255.255.255.248
+gateway 10.151.77.17	
+```
+
+![](img/pre1.PNG)
+
+Pada UML TUBAN (DHCP Server) :
+```
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 10.151.77.20
+netmask 255.255.255.248
+gateway 10.151.77.17
+```
+
+![](img/pre1.PNG)
+
+Karena konfigurasi Client tidak diperbolehkan menggunakan IP statis, maka konfigurasinya adalah sebagai berikut. Pada UML 
+GRESIK, SIDOARJO, BANYUWANGI, MADIUN (Client) :
+```
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+```
+
+![](img/pre1.PNG)
+
+Kemudian restart semua UML dengan mengetikkan `service networking restart`. 
+
+### **Nomor 2**
+SURABAYA ditunjuk sebagai perantara (DHCP Relay) antara DHCP Server dan client.
+
+Karena SURABAYA yang ditunjuk, maka install dhcp-relay pada SURABYA dengan command :
+```
+apt-get install isc-dhcp-relay
+```
+
+Kemudian kita atur konfigurasi interfacenya agar mengarah ke TUBAN. Pertama buka file konfigurasi dhcp-relay dengan command :
+```
+nano /etc/default/isc-dhcp-relay
+```
+agar mengarah ke TUBAN ditambahkan :
+```
+SERVERS="10.151.77.20" 
+INTERFACESv4="eth1 eth2 eth3"
+```
+
+![](img/pre1.PNG)
+
+kemudian restart dengan command `service-isc-dhcp-relay restart`
+
+### **Nomor 3**
+Client pada subnet 1 mendapatkan range IP dari 192.168.0.10 sampai 192.168.0.100 dan 192.168.0.110 sampai 192.168.0.200.
+
+Sebelum melakukan instalasi dhcp server, terlebih dahulu melakukan `apt-get update` setelah itu menginstall dengan menggunakan command `apt-get install isc-dhcp-server`.
+
+Setelah itu, konfigurasi dhcp server dimulai. Karena TUBAN yang dijadikan sebagai DHCP server, maka konfigurasi interface dilakukan di TUBAN. Buka konfigurasi file interface dengan perintah :
+```
+nano /etc/default/isc-dhcp-server
+```
+
+Kemudian berikan layanan DHCP kepada `eth0` dengan menambahkan `INTERFACES="eth0"`.
+
+![](img/pre1.PNG)
+
+Kemudian untuk mengatur range IP masing-masing subnet, buka file konfigurasi DHCP dengan perintah :
+```
+nano /etc/dhcp/dhcpd.conf
+```
+
+Kemudian tambahkan script berikut untuk subnet 1 :
+```
+range 192.168.0.10 192.168.0.100;
+range 192.168.0.110 192.168.0.200;
+```
+
+Hasil : 
+
+![](img/pre1.PNG)
+
+### **Nomor 4**
+Client pada subnet 3 mendapatkan range IP dari 192.168.1.50 sampai 192.168.1.70.
+
+Untuk mengatur range IP masing-masing subnet, buka file konfigurasi DHCP dengan perintah :
+```
+nano /etc/dhcp/dhcpd.conf
+```
+
+Kemudian tambahkan script berikut untuk subnet 2 :
+```
+range 192.168.1.50 192.168.1.70;
+```
+
+Hasil : 
+
+![](img/pre1.PNG)
+
+### **Nomor 5**
+Client mendapatkan DNS Malang dan DNS 202.46.129.2 dari DHCP.
+
+Untuk mengatur DNS yang didapat masing-masing subnet, buka file konfigurasi DHCP dengan perintah :
+```
+nano /etc/dhcp/dhcpd.conf
+```
+
+IP MALANG kelompok kami adalah `10.151.77.18`. Maka ditambahkan script berikut pada subnet 1 dan subnet 2 :
+```
+option domain-name-servers 10.151.77.18, 202.46.129.2;
+```
+
+Hasil : 
+
+![](img/pre1.PNG)
+
+### **Nomor 6**
+Client di subnet 1 mendapatkan peminjaman alamat IP selama 5 menit, sedangkan client pada subnet 3 mendapatkan peminjaman IP selama 10 menit.
+
+Untuk mengatur waktu peminjaman alamat IP yang didapat masing-masing subnet, buka file konfigurasi DHCP dengan perintah :
+```
+nano /etc/dhcp/dhcpd.conf
+```
+
+Subnet 1 diberikan waktu peminjaman selama 5 menit = 300 detik. Maka ditambahkan script berikut pada subnet 1 :
+```
+default-lease-time 300;
+max-lease-time 7200;
+```
+Subnet 2 diberikan waktu peminjaman selama 10 menit = 600 detik. Maka ditambahkan script berikut pada subnet 2 :
+```
+default-lease-time 600;
+max-lease-time 7200;
+```
+
+Berikut adalah konfigurasi dari nomor 3 - 6 :
+
+![](img/pre1.PNG)
+
+Setelah semua konfigurasi terpasang, restart service isc-dhcp-server dengan perintah :
+```
+service isc-dhcp-server restart
+```
+
 ### **Nomor 7**
 Setelah melakukan pengaturan pada *proxy server* (Mojokerto), kita dapat melakukan fungsi ```htpasswd``` yang didapat melalui ```apache2-utils```.
 
@@ -122,3 +353,5 @@ setelah itu lakukan *restart* pada ```bind9``` dan lakukan konfigurasi pada *pro
 ## Referensi
 * https://github.com/arsitektur-jaringan-komputer/Modul-Jarkom/tree/modul-3/Proxy%20Server
 * https://github.com/arsitektur-jaringan-komputer/Modul-Jarkom/tree/modul-2/DNS
+* https://github.com/arsitektur-jaringan-komputer/Modul-Jarkom/tree/modul-3/DHCP
+* https://github.com/arsitektur-jaringan-komputer/Modul-Jarkom/blob/modul-uml/README.md
