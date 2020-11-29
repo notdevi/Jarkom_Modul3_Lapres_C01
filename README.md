@@ -142,7 +142,7 @@ nano /etc/default/isc-dhcp-relay
 agar mengarah ke TUBAN ditambahkan :
 ```
 SERVERS="10.151.77.20" 
-INTERFACESv4="eth1 eth2 eth3"
+INTERFACESv4="eth1 eth2"
 ```
 
 ![](img/2.1.PNG)
