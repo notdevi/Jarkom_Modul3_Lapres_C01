@@ -266,6 +266,8 @@ http_access allow USERS
 
 Setelah itu, lakukan restart pada squid dengan ```service squid restart``` maka halaman yang diakses menggunakan *proxy* akan membutuhkan *username* dan *password* untuk dapat diakses.
 
+![](img/Screenshot_1522.png)
+
 ### **Nomor 8**
 Dengan menggunakan ***Access Control Lists*** atau biasa disingkat ***ACL***, kita dapat mengatur waktu kapan *proxy* kita dapat mengakses suatu situs.
 
@@ -329,6 +331,8 @@ Setelah itu, kita tinggal menambahkan *folder* tersebut pada ```squid.conf``` de
 error_directory /etc/squid/pages
 ```
 Setelah itu, lakukan restart *squid*.
+
+![](img/Screenshot_1523.png)
 
 ### **Nomor 12**
 Untuk membuat domain ***janganlupa-ta.c01.pw***, kita menggunakan langkah-langkah seperti dari modul sebelumnya, yaitu ```Domain Name Server```.
