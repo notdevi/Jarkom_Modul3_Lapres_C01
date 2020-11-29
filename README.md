@@ -12,7 +12,7 @@ Praktikum Modul 3 Jaringan Komputer 2020
 ### **Nomor 1**
 Membuat topologi jaringan demi kelancaran TA-nya dengan kriteria sebagai berikut :
 
-![](img/pre1.PNG)
+![](img/topo.PNG)
 
 Bu Meguri memerintahkan Anri untuk menjadikan SURABAYA sebagai router, MALANG sebagai DNS Server, TUBAN sebagai DHCP server, serta MOJOKERTO sebagai Proxy server, dan UML lainnya sebagai client. 
 
@@ -38,7 +38,7 @@ xterm -T MADIUN -e linux ubd0=MADIUN,jarkom umid=MADIUN eth0=daemon,,,switch3 me
 xterm -T BANYUWANGI -e linux ubd0=BANYUWANGI,jarkom umid=BANYUWANGI eth0=daemon,,,switch3 mem=64M &
 ```
 
-![](img/pre1.PNG)
+![](img/1.PNG)
 
 Setelah login, setting IP pada setiap UML dengan mengetikkan `nano /etc/network/interfaces`. Lalu ditambahkan settingan sebagai berikut :
 
@@ -69,7 +69,7 @@ address 10.151.77.17
 netmask 255.255.255.248
 ```
 
-![](img/pre1.PNG)
+![](img/1.2.PNG)
 
 Pada UML MALANG (DNS Server) :
 ```
@@ -83,7 +83,7 @@ netmask 255.255.255.248
 gateway 10.151.77.17
 ```
 
-![](img/pre1.PNG)
+![](img/1.3.PNG)
 
 Pada UML MOJOKERTO (Proxy Server) :
 ```
@@ -97,7 +97,7 @@ netmask 255.255.255.248
 gateway 10.151.77.17	
 ```
 
-![](img/pre1.PNG)
+![](img/1.4.PNG)
 
 Pada UML TUBAN (DHCP Server) :
 ```
@@ -111,7 +111,7 @@ netmask 255.255.255.248
 gateway 10.151.77.17
 ```
 
-![](img/pre1.PNG)
+![](img/1.5.PNG)
 
 Karena konfigurasi Client tidak diperbolehkan menggunakan IP statis, maka konfigurasinya adalah sebagai berikut. Pada UML 
 GRESIK, SIDOARJO, BANYUWANGI, MADIUN (Client) :
@@ -123,7 +123,7 @@ auto eth0
 iface eth0 inet dhcp
 ```
 
-![](img/pre1.PNG)
+![](img/1.6.PNG)
 
 Kemudian restart semua UML dengan mengetikkan `service networking restart`. 
 
@@ -145,7 +145,7 @@ SERVERS="10.151.77.20"
 INTERFACESv4="eth1 eth2 eth3"
 ```
 
-![](img/pre1.PNG)
+![](img/2.1.PNG)
 
 kemudian restart dengan command `service-isc-dhcp-relay restart`
 
@@ -161,7 +161,7 @@ nano /etc/default/isc-dhcp-server
 
 Kemudian berikan layanan DHCP kepada `eth0` dengan menambahkan `INTERFACES="eth0"`.
 
-![](img/pre1.PNG)
+![](img/3.1.PNG)
 
 Kemudian untuk mengatur range IP masing-masing subnet, buka file konfigurasi DHCP dengan perintah :
 ```
@@ -173,10 +173,6 @@ Kemudian tambahkan script berikut untuk subnet 1 :
 range 192.168.0.10 192.168.0.100;
 range 192.168.0.110 192.168.0.200;
 ```
-
-Hasil : 
-
-![](img/pre1.PNG)
 
 ### **Nomor 4**
 Client pada subnet 3 mendapatkan range IP dari 192.168.1.50 sampai 192.168.1.70.
@@ -190,10 +186,6 @@ Kemudian tambahkan script berikut untuk subnet 2 :
 ```
 range 192.168.1.50 192.168.1.70;
 ```
-
-Hasil : 
-
-![](img/pre1.PNG)
 
 ### **Nomor 5**
 Client mendapatkan DNS Malang dan DNS 202.46.129.2 dari DHCP.
@@ -210,7 +202,7 @@ option domain-name-servers 10.151.77.18, 202.46.129.2;
 
 Hasil : 
 
-![](img/pre1.PNG)
+![](img/5.1.PNG)
 
 ### **Nomor 6**
 Client di subnet 1 mendapatkan peminjaman alamat IP selama 5 menit, sedangkan client pada subnet 3 mendapatkan peminjaman IP selama 10 menit.
@@ -233,7 +225,7 @@ max-lease-time 7200;
 
 Berikut adalah konfigurasi dari nomor 3 - 6 :
 
-![](img/pre1.PNG)
+![](img/6.1.PNG)
 
 Setelah semua konfigurasi terpasang, restart service isc-dhcp-server dengan perintah :
 ```
